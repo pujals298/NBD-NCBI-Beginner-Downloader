@@ -1,11 +1,15 @@
 import time
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 
 from Bio import Entrez, SeqIO
+from Bio.SeqRecord import SeqRecord
+
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
-DEFAULT_EMAIL = "your_email@example.com"
+MAX_SLEN_FILTER_VALUE = 1_000_000_000  # Open-ended upper bound for SLEN when user leaves max empty.
+NCBI_REQUEST_DELAY_SECONDS = 1 / 3  # Keep to <=3 requests/second for NCBI Entrez without API key.
 
 
 def prompt_required(prompt_text: str) -> str:
@@ -16,7 +20,7 @@ def prompt_required(prompt_text: str) -> str:
         print("This field is required.")
 
 
-def prompt_optional_int(prompt_text: str):
+def prompt_optional_int(prompt_text: str) -> int | None:
     value = input(prompt_text).strip()
     if not value:
         return None
@@ -27,7 +31,14 @@ def prompt_optional_int(prompt_text: str):
         return None
 
 
-def build_query(gene_names, organism=None, taxid=None, length_min=None, length_max=None):
+def build_query(
+    gene_names: list[str],
+    organism: str | None = None,
+    taxid: str | None = None,
+    length_min: int | None = None,
+    length_max: int | None = None,
+) -> str:
+    """Build an NCBI Entrez query string from required/optional filters."""
     gene_query = " OR ".join(f'({gene}[Gene Name])' for gene in gene_names)
     terms = [f"({gene_query})"]
 
@@ -38,13 +49,15 @@ def build_query(gene_names, organism=None, taxid=None, length_min=None, length_m
 
     if length_min is not None or length_max is not None:
         min_len = 1 if length_min is None else max(length_min, 1)
-        max_len = 1000000000 if length_max is None else max(length_max, min_len)
+        max_len = MAX_SLEN_FILTER_VALUE if length_max is None else max(length_max, min_len)
         terms.append(f"({min_len}:{max_len}[SLEN])")
 
     return " AND ".join(terms)
 
 
-def fetch_records(database, query, max_sequences=None):
+def fetch_records(database: str, query: str, max_sequences: int | None = None) -> list[SeqRecord]:
+    """Search IDs with Entrez.esearch, then download FASTA records with Entrez.efetch."""
+    # Query with retmax=0 retrieves only the total count without downloading IDs.
     search_handle = Entrez.esearch(db=database, term=query, retmax=0)
     search_record = Entrez.read(search_handle)
     search_handle.close()
@@ -63,17 +76,18 @@ def fetch_records(database, query, max_sequences=None):
     if not ids:
         return []
 
-    time.sleep(0.34)
+    time.sleep(NCBI_REQUEST_DELAY_SECONDS)
     fetch_handle = Entrez.efetch(db=database, id=ids, rettype="fasta", retmode="text")
     records = list(SeqIO.parse(fetch_handle, "fasta"))
     fetch_handle.close()
     return records
 
 
-def write_excel(records, output_xlsx: Path):
+def write_excel(records: list[SeqRecord], output_xlsx: Path) -> None:
+    """Write accession, description/name, and length fields to an Excel file."""
     wb = Workbook()
     ws = wb.active
-    ws.title = "Secuencias"
+    ws.title = "Sequences"
 
     header_font = Font(name="Arial", bold=True, color="FFFFFF", size=11)
     header_fill = PatternFill("solid", start_color="2E4057")
@@ -124,15 +138,12 @@ def main():
     length_min = prompt_optional_int("Minimum sequence length (optional): ")
     length_max = prompt_optional_int("Maximum sequence length (optional): ")
     output_base = input("Output filename base [download]: ").strip() or "download"
+    output_base = output_base.removesuffix(".fasta").removesuffix(".xlsx")
     max_sequences = prompt_optional_int("Max sequences to download (optional, default unlimited): ")
 
-    email = input("Email for NCBI Entrez (required by NCBI) [your_email@example.com]: ").strip() or DEFAULT_EMAIL
+    email = prompt_required("Email for NCBI Entrez (required by NCBI): ")
     Entrez.email = email
 
-    if email == DEFAULT_EMAIL:
-        print("WARNING: You are using a placeholder email. Replace it with your real email when possible.")
-
-    output_base = output_base.removesuffix(".fasta").removesuffix(".xlsx")
     fasta_path = Path(f"{output_base}.fasta")
     excel_path = Path(f"{output_base}.xlsx")
 
@@ -147,12 +158,21 @@ def main():
     print(f"\nSearching NCBI ({database})...")
     try:
         records = fetch_records(database=database, query=query, max_sequences=max_sequences)
-    except Exception as exc:
+    except (HTTPError, URLError, RuntimeError) as exc:
         print(f"Error while contacting NCBI: {exc}")
         return
 
-    SeqIO.write(records, fasta_path, "fasta")
-    write_excel(records, excel_path)
+    try:
+        SeqIO.write(records, fasta_path, "fasta")
+    except OSError as exc:
+        print(f"Error writing FASTA file ({fasta_path}): {exc}")
+        return
+
+    try:
+        write_excel(records, excel_path)
+    except OSError as exc:
+        print(f"Error writing Excel file ({excel_path}): {exc}")
+        return
 
     print(f"\nDone. {len(records)} sequences were downloaded.")
     print(f"FASTA: {fasta_path.resolve()}")

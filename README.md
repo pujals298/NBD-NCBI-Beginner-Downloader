@@ -18,4 +18,4 @@ Run:
 python "1 SEARCH GENES/ncbi_gene_downloader.py"
 ```
 
-The script asks for inputs in the terminal (only gene name is required), downloads sequences from NCBI into one FASTA file, and also creates an Excel file for quality check.
+The script asks for inputs in the terminal (gene name and Entrez email are required), downloads sequences from NCBI into one FASTA file, and also creates an Excel file for quality check.
