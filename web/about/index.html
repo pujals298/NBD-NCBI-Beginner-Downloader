@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Learn about the blaZ Phylogeny Project - Bioinformatics analysis for antibiotic resistance genes"><title>Information | blaZ Phylogeny</title><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/_astro/Layout.DO8YspjS.css"></head> <body> <a class="skip-link" href="#main">Skip to content</a> <header class="site-header"> <div class="container"> <div class="header-row"> <a class="brand" href="/" aria-label="blaZ Phylogeny"> <span class="brand-mark" aria-hidden="true"></span> <span>blaZ Phylogeny</span> </a> <nav class="nav nav-desktop" aria-label="Primary"> <a class="nav-link" href="/"> Home </a><a class="nav-link" href="/about"> Information </a><a class="nav-link" href="/guide"> Workflow </a> </nav> <details class="nav-mobile"> <summary aria-label="Open menu">Menu</summary> <nav class="nav-mobile-panel" aria-label="Mobile"> <a class="nav-link" href="/"> Home </a><a class="nav-link" href="/about"> Information </a><a class="nav-link" href="/guide"> Workflow </a> </nav> </details> </div> </div> </header> <main id="main" class="main">  <div class="container"> <section class="hero"> <div class="kicker">Information</div> <h1>Concepts, tools, and what each program does</h1> <p class="lead">
+This page explains the basic concepts and the external programs used by the pipeline.
+        Every tool below includes a link to its official webpage so you can download it.
+</p> <div class="actions"> <a class="btn btn-primary" href="/guide">Follow the workflow</a> <a class="btn btn-secondary" href="/">Back to home</a> </div> </section> <section class="section"> <div class="prose"> <h2>Key concepts (plain language)</h2> <h3>FASTA file</h3> <p>
+A <strong>FASTA</strong> file is a plain-text file that stores sequences.
+          Each sequence starts with a header line that begins with <code>&gt;</code>.
+</p> <h3>Multiple sequence alignment</h3> <p>
+An <strong>alignment</strong> lines up sequences so you can compare the same positions across samples.
+          This is needed before building a phylogenetic tree.
+</p> <h3>Trimming</h3> <p>
+Trimming removes columns in the alignment that are mostly gaps or noisy.
+          This can make the tree more stable and easier to interpret.
+</p> <h3>Phylogenetic tree</h3> <p>
+A <strong>phylogenetic tree</strong> groups sequences by similarity.
+          Sequences that are more similar tend to appear closer together.
+</p> </div> </section> <section class="section"> <h2>Programs used by this project</h2> <div class="grid-3" style="margin-top: 1rem;"> <div class="card"> <div class="muted">Alignment</div> <h3>MUSCLE</h3> <p class="muted">
+Builds a multiple sequence alignment from your input FASTA.
+            This pipeline uses MUSCLE first to create <code>*_aligned.fasta</code>.
+</p> <p style="margin-top: 0.75rem;"> <a href="https://www.drive5.com/muscle/" target="_blank" rel="noreferrer">Official MUSCLE page</a> </p> </div> <div class="card"> <div class="muted">Trimming</div> <h3>ClipKIT</h3> <p class="muted">
+Removes low-information columns from the alignment.
+            The default mode in this workspace is <code>smart-gap</code>.
+</p> <p style="margin-top: 0.75rem;"> <a href="https://jlsteenwyk.com/ClipKIT/" target="_blank" rel="noreferrer">Official ClipKIT page</a> </p> </div> <div class="card"> <div class="muted">Tree inference</div> <h3>IQ-TREE 2</h3> <p class="muted">
+Infers a phylogenetic tree from the trimmed alignment.
+            In this workspace it is invoked with model testing and ultrafast bootstrap.
+</p> <p style="margin-top: 0.75rem;"> <a href="https://iqtree.org/" target="_blank" rel="noreferrer">Official IQ-TREE page</a> </p> </div> </div> </section> <section class="section"> <div class="callout"> <div class="prose"> <h2 style="margin-top: 0;">Useful notes for this repository</h2> <ul> <li>
+The main pipeline script is <code>code/aln_trim_tree.py</code>.
+</li> <li>
+MUSCLE is vendored for Windows in this repo as <code>code/muscle-win64.v5.3.exe</code>.
+              On macOS/Linux, download MUSCLE and pass <code>--muscle-exe</code> if needed.
+</li> <li>
+IQ-TREE is expected at <code>code/bin/iqtree2.exe</code> by default.
+              On macOS/Linux, download IQ-TREE 2 and pass <code>--iqtree-exe</code>.
+</li> <li>
+ClipKIT must be available as <code>clipkit</code> (or provide <code>--clipkit-exe</code>).
+</li> </ul> </div> </div> </section> </div>  </main> <footer class="footer"> <div class="container"> <div class="footer-grid"> <div> <strong>About</strong> <p class="muted" style="margin-top: 0.5rem;">
+A small, beginner-friendly site for the blaZ phylogeny workflow: align sequences, trim noisy columns, infer a tree.
+</p> </div> <div> <strong>Tools</strong> <ul style="margin-top: 0.5rem; padding-left: 1.25rem;" class="muted"> <li>MUSCLE</li> <li>ClipKIT</li> <li>IQ-TREE</li> </ul> </div> <div> <strong>Files You Get</strong> <ul style="margin-top: 0.5rem; padding-left: 1.25rem;" class="muted"> <li>`*_aligned.fasta`</li> <li>`*_aligned_trimmed.fasta`</li> <li>`iqtree_results/`</li> </ul> </div> </div> <p class="muted" style="margin-top: 1.5rem; font-size: 0.95rem;">
+© 2026 blaZ Phylogeny Project
+</p> </div> </footer> </body></html>
