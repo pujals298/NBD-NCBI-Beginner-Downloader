@@ -16,7 +16,7 @@ getwd()
 setwd("C:/Users/location")
 
 # Create a variable with the name of the tree file
-tree <- read.tree("arbol_blaz_2.0.treefile")
+tree <- read.tree("download_code.treefile")
 
 # Create a basic tree to see the possible clusters/groups
 

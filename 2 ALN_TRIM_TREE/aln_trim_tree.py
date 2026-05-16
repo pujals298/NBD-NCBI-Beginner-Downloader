@@ -2,6 +2,7 @@ import argparse # With parsing we can make the code reusable without changing th
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 def run(cmd): # A function to run an external program and not have to repeat it for each program we want to run (MUSCLE, ClipKIT, IQ-TREE)
     """Run a command and stop if it fails."""
@@ -48,6 +49,13 @@ def main():
 
     args = parser.parse_args() # To actually parse the arguments provided by the user when running the script. Read what the user typed, and store it in args.
     # If the user doesn’t provide an argument, it uses the default you defined.
+
+    script_dir = Path(__file__).resolve().parent
+
+    # Make default tool paths relative to this script location
+    args.muscle_exe = str((script_dir / args.muscle_exe).resolve()) if args.muscle_exe == "muscle-win64.v5.3.exe" else args.muscle_exe
+    if args.iqtree_exe == r"bin\iqtree2.exe":
+        args.iqtree_exe = str((script_dir / "bin" / "iqtree2.exe").resolve())
 
     # Create output filenames (automatically if not specified)
     aligned, trimmed, tree_prefix = default_output_names(args.input) # This calls the function default_output_names, passing in the argument args.input (the input file name provided by the user). Tuple unpacking.
