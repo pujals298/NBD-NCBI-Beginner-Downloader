@@ -12,7 +12,7 @@ from Bio.SeqRecord import SeqRecord
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
-# --- SSL (Windows-friendly) ---
+# --- SSL context --- Helps the script to reliably make secure HTTPS connections by telling it which “trusted certificates” to use. Prevents SSL errors.
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 ssl._create_default_https_context = lambda: ssl_context
 
@@ -20,16 +20,15 @@ ssl._create_default_https_context = lambda: ssl_context
 # We'll adapt this at runtime depending on whether an API key is provided.
 NCBI_REQUEST_DELAY_SECONDS = 1 / 3
 
-# --- Retry tuning (covers both network calls and mid-stream parse EOF) ---
+# --- Retry tuning ---
 ENTREZ_MAX_RETRIES = 10
 ENTREZ_BACKOFF_BASE_SECONDS = 1.8
 ENTREZ_JITTER_SECONDS = 0.6
 
-# --- Batch sizes ---
-ASSEMBLY_RETMAX = 50
-NUCCORE_LINK_RETMAX = 200
-GB_FETCH_BATCH = 5  # keep small: gbwithparts can be large and more likely to EOF
-
+# --- Batch sizes --- How many things to process in one network request / chunk
+ASSEMBLY_RETMAX = 50 # Scan up to 50 assemblies unless the user overrides it 
+NUCCORE_LINK_RETMAX = 250 # Per assembly, don’t try to scan more than 250 nucleotide records
+GB_FETCH_BATCH = 5  # This batching is made for reliability (because large downloads get cut off (EOF) more often), easier "retry" behaviour (retry only the batch that failed), and for server friendliness 
 
 def prompt_required(prompt_text: str) -> str:
     while True:
@@ -123,7 +122,7 @@ def elink_assembly_to_nuccore_ids(assembly_id: str) -> list[str]:
     for attempt in range(1, ENTREZ_MAX_RETRIES + 1):
         try:
             time.sleep(NCBI_REQUEST_DELAY_SECONDS)
-            h = Entrez.elink(dbfrom="assembly", db="nuccore", id=assembly_id, linkname="assembly_nuccore_refseq")
+            h = Entrez.elink(dbfrom="assembly", db="nuccore", id=assembly_id, linkname="assembly_nuccore_refseq") #  For this assembly, give me the linked nucleotide sequence records in the nuccore database that correspond to RefSeq
             r = Entrez.read(h)
             h.close()
 
@@ -145,7 +144,7 @@ def elink_assembly_to_nuccore_ids(assembly_id: str) -> list[str]:
 
 def fetch_genbank_batch_records_with_retry(nuccore_ids_batch: list[str]):
     """
-    Critical: retry the *whole* fetch+parse, because EOF can occur mid-parse.
+    Retry the *whole* fetch+parse, because EOF can occur mid-parse.
     """
     last_exc: Exception | None = None
     for attempt in range(1, ENTREZ_MAX_RETRIES + 1):
@@ -157,9 +156,9 @@ def fetch_genbank_batch_records_with_retry(nuccore_ids_batch: list[str]):
                 id=",".join(nuccore_ids_batch),
                 rettype="gbwithparts",
                 retmode="text",
-            )
+            ) # Download the nucleotide records, but return them in GenBank flatfile format (gbwithparts)
 
-            # Materialize immediately so parsing errors are caught here and retried.
+            # Materialize immediately so parsing errors are caught here and retried
             records = list(SeqIO.parse(h, "genbank"))
             h.close()
             return records
@@ -290,7 +289,8 @@ def write_excel(rows: list[dict], out_xlsx: Path) -> None:
 def main():
     global NCBI_REQUEST_DELAY_SECONDS
 
-    print("=== Extract Gene by Annotation ===")
+    print("=== Extract Gene Products by Annotation ===")
+    print(" ")
     print("This extracts CDS by gene/product annotation from RefSeq genome records in NCBI.\n")
 
     Entrez.email = prompt_required("Email for NCBI Entrez (required by NCBI): ")
@@ -328,7 +328,7 @@ def main():
     out_fasta = Path(output_base + ".fasta")
     out_xlsx = Path(output_base + ".xlsx")
 
-    make_code_version = (input("Create code-version FASTA? [y/N]: ").strip().lower() == "y")
+    make_code_version = (input("Create additional FASTA file with a numbered code? [Y/N]: ").strip().lower() == "y")
     code_prefix = None
     out_code_fasta = None
     coded_records: list[SeqRecord] = []

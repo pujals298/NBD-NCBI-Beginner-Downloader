@@ -1,21 +1,18 @@
-# RUNNING THE PIPELINE
 import subprocess
 import sys
 from pathlib import Path
 
-# Define theroute for each step:
-
-STEP1 = Path("1 SEARCH GENES") / "refseq.py"
+STEP1 = Path("1 SEARCH GENES") / "download.py"
 STEP2 = Path("2 ALN_TRIM_TREE") / "aln_trim_tree.py"
 
-# Define the auxiliary function
-
-def run(cmd:list[str]) -> None: # This means that the function run takes a list of strings as an argument and returns nothing (None).
+def run(cmd: list[str]) -> None:
     cmd = [str(c) for c in cmd]
     print("\nRunning:", cmd)
     subprocess.run(cmd, check=True)
 
-# Define the main function
+def ask_optional(prompt: str) -> str | None:
+    val = input(prompt).strip()
+    return val if val else None
 
 def main():
     print("=== Pipeline runner ===")
@@ -39,13 +36,22 @@ def main():
             print(f"Step 2 script not found: {STEP2}")
             return
 
-        # Asks for the input file for Step 2, which is the output of Step 1
         fasta = input("\nPath to input FASTA for Step 2: ").strip()
         if not fasta:
             print("No FASTA provided.")
             return
 
-        run([sys.executable, STEP2, "--input", fasta])
+        # Collect optional Step 2 settings
+        clipkit_mode = ask_optional("ClipKIT mode (Optional) [default smart-gap]: ")
+        outgroup = ask_optional("Outgroup taxon name (Optional) [default the first one]: ")
+
+        cmd = [sys.executable, STEP2, "--input", fasta]
+        if clipkit_mode:
+            cmd += ["--clipkit-mode", clipkit_mode]
+        if outgroup:
+            cmd += ["--outgroup", outgroup]
+
+        run(cmd)
 
     print("\nDone.")
 

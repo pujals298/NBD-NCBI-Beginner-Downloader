@@ -2,7 +2,7 @@
                    FOR WINDOWS
 ======================================================
 
-powershell -ExecutionPolicy Bypass -File .\setting.ps1
+powershell -ExecutionPolicy Bypass -File .\setup.ps1
 
 
 
@@ -10,4 +10,4 @@ powershell -ExecutionPolicy Bypass -File .\setting.ps1
                  FOR LINUX/MACOS
 ======================================================
 
-bash ./setting.sh
+bash ./setup.sh
