@@ -8,7 +8,7 @@
 
 It is designed for researchers with little-to-no computing background: You mainly answer prompts and the script runs the steps for you!
 
-## <img src="docs/folder-open.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Project structure (what the folders mean)
+## <img src=".docs/icons/folder-open.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Project structure (what the folders mean)
 
 ```text
 NBGD-NCBI-Bacterial-Gene-Downloader/
