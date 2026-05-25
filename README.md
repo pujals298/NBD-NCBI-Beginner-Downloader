@@ -8,7 +8,7 @@
 
 It is designed for researchers with little-to-no computing background: You mainly answer prompts and the script runs the steps for you!
 
-## <img src=".docs/icons/folder-open.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Project structure (what the folders mean)
+## <img src="docs/icons/folder-open.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Project structure (what the folders mean)
 
 ```text
 NBGD-NCBI-Bacterial-Gene-Downloader/
@@ -24,7 +24,7 @@ NBGD-NCBI-Bacterial-Gene-Downloader/
 
 
 
-# <img src=".docs/icons/circle-alert.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Before you start (What you need)
+# <img src="docs/icons/circle-alert.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Before you start (What you need)
 
 ### 1) Install Python
 You need **Python 3** installed (recommended: a Python that is still supported, such as **3.12**).
@@ -42,7 +42,7 @@ NCBI asks users of automated tools to provide an email address realated to their
 - **API key is optional**, but recommended because it allows faster downloads. You can create a new one for free in your NCBI 'account settings'
 
 ---
-## <img src=".docs/icons/pointer.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> How to start 
+## <img src="docs/icons/pointer.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> How to start 
 
 ### Windows (PowerShell)
 1. Download / clone this repository to your computer
@@ -72,7 +72,7 @@ bash ./setup.sh
 - (On Linux/macOS) try to install the MUSCLE + IQ-TREE tools
 - Automatically start to run the pipeline
 ---
-## <img src=".docs/icons/sparkles.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Running the pipeline
+## <img src="docs/icons/sparkles.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Running the pipeline
 
 After setup finishes, you will see a simple menu appear on the terminal. You will need to select the option you want to do:
 - Step 1 only (download/extract sequences) = **1**
@@ -83,7 +83,7 @@ Depending on which one you chose,the script will then prompt you about important
 - Your NCBI e-mail and API, the gene name, or the TaxID of your organism.
 - The name of the file you wish to align
 
-## <img src=".docs/icons/file-check.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Outputs (what files you get)
+## <img src="docs/icons/file-check.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Outputs (what files you get)
 
 ### Step 1 outputs
 - A **FASTA** file containing the downloaded sequences
@@ -98,7 +98,7 @@ You will typically get:
   - The tree file (commonly `*.treefile`)
   - Statistics / run logs
 
-## <img src=".docs/icons/wrench.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> External tools used (Step 2)
+## <img src="docs/icons/wrench.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> External tools used (Step 2)
 
 - **MUSCLE** — multiple sequence alignment  
 - **ClipKIT** — alignment trimming (installed via Python package)
@@ -108,7 +108,7 @@ You will typically get:
 
 ---
 
-## <img src=".docs/icons/message-circle-question-mark.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Additional information
+## <img src="docs/icons/message-circle-question-mark.svg" width="22" alt="Install icon" style="vertical-align: middle;" /> Additional information
 
 If you have any trouble with the pipeline, or just wish to know more about it and bioinformatics in general, check out the webpage for this repository!
 https://pujals298.github.io/NBGD-NCBI-Bacterial-Gene-Downloader/
